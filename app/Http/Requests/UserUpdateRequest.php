@@ -4,13 +4,12 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-
-class UserStoreRequest extends FormRequest
+class UserUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
-    public function authorize()  : bool
+    public function authorize(): bool
     {
         return true;
     }
@@ -20,14 +19,13 @@ class UserStoreRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules() : array
+    public function rules(): array
     {
         return [
-            'username' => ['required', 'string', 'max:255', 'unique:users'],
+            'username' => ['required', 'string', 'max:255'],
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8'],
+            'email' => ['required', 'string', 'email', 'max:255'],
         ];
     }
 }

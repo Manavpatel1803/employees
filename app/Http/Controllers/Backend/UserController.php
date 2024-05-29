@@ -4,17 +4,26 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserStoreRequest;
+use App\Http\Requests\UserUpdateRequest;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $users = User::all();
+        if ($request->has('search')) {
+            $users = User::where('username', 'like', "%{$request->search}%")
+                ->orWhere('first_name', 'like', "%{$request->search}%")
+                ->orWhere('last_name', 'like', "%{$request->search}%")
+                ->orWhere('email', 'like', "%{$request->search}%")
+                ->get();
+        }
         return view('users.index', compact('users'));
     }
 
@@ -39,17 +48,13 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->route('users.index')->with('success', 'User created successfully');
+        return redirect()->route('users.index')->with('message', 'User Registered successfully');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        //
-    }
-
+  
     /**
      * Show the form for editing the specified resource.
      */
@@ -61,16 +66,27 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UserUpdateRequest $request, User $user)
     {
-        //
+        $user->update([
+            'username' => $request->username,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'email' => $request->email,
+        ]);
+
+        return redirect()->route('users.index')->with('message', 'User Updated successfully');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(User $user)
     {
-        //
+        if (auth()->id()== $user->id ) {
+            return redirect()->route('users.index')->with('error', 'You cannot delete yourself');
+        }
+        $user->delete();
+        return redirect()->route('users.index')->with('message', 'User Deleted successfully');
     }
 }
